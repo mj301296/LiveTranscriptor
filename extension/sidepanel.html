@@ -1,0 +1,49 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>TwinMind Transcribe</title>
+  <link rel="stylesheet" href="sidepanel.css"/>
+</head>
+<body>
+  <header>
+    <h1>Transcription</h1>
+    <div id="status" aria-live="polite">idle</div>
+  </header>
+
+  <section id="controls">
+    <button id="startBtn" class="primary" aria-pressed="false">Start</button>
+    <button id="pauseBtn" disabled>Pause</button>
+    <button id="stopBtn" disabled>Stop</button>
+    <label class="toggle"><input type="checkbox" id="micToggle"> Mic</label>
+    <label class="toggle"><input type="checkbox" id="chunkMode"> Chunk Mode</label>
+  </section>
+
+  <section id="timer">
+    <span id="clock">00:00:00</span>
+  </section>
+
+  <!-- Single transcript section: transcripts from mic and tab are labeled -->
+  <section id="transcript" tabindex="0" aria-label="Live transcript"></section>
+
+  <section id="exports">
+    <button id="copyBtn">Copy</button>
+    <button id="downloadTxt">Download .txt</button>
+    <button id="downloadJson">Download .json</button>
+  </section>
+
+  <footer>
+    <div id="indicators">
+      <span id="recDot" title="Recording"></span>
+      <span id="connDot" title="Connection"></span>
+      <span id="errText" role="alert"></span>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script type="module" src="lib/ring-buffer.js"></script>
+  <script type="module" src="lib/utils.js"></script>
+  <script type="module" src="sidepanel.js"></script>
+</body>
+</html>

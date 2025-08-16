@@ -1,15 +1,37 @@
 import speech from '@google-cloud/speech';
 const client = new speech.SpeechClient();
 
+/**
+ * Transcribe a full audio buffer using Google Cloud Speech-to-Text.
+ * @param {Buffer|Uint8Array} bytes
+ * @returns {Promise<string>}
+ */
+export async function googleChunk(bytes) {
+  try {
+    const [resp] = await client.recognize({
+      config: {
+        encoding: 'LINEAR16',
+        sampleRateHertz: 16000,
+        languageCode: 'en-US',
+        enableAutomaticPunctuation: true,
+      },
+      audio: { content: Buffer.from(bytes).toString('base64') },
+    });
 
-export async function googleChunk(bytes){
-  const [resp] = await client.recognize({
-    config: { encoding:'LINEAR16', sampleRateHertz:16000, languageCode:'en-US', enableAutomaticPunctuation:true },
-    audio: { content: Buffer.from(bytes).toString('base64') }
-  });
-  return resp.results?.map(r=>r.alternatives?.[0]?.transcript).join('\n') || '';
+    return resp.results
+      ?.map(r => r.alternatives?.[0]?.transcript)
+      .filter(Boolean)
+      .join('\n') || '';
+  } catch (err) {
+    console.error("googleChunk error:", err);
+    return '';
+  }
 }
 
+/**
+ * Creates a streaming Google Speech-to-Text session over WebSocket.
+ * @param {WebSocket} ws
+ */
 export function googleStream(ws) {
   const request = {
     config: {
@@ -21,10 +43,22 @@ export function googleStream(ws) {
     interimResults: true,
   };
 
-  let recognizeStream;
+  let recognizeStream = null;
+
+  function safeEnd() {
+    if (recognizeStream) {
+      try {
+        recognizeStream.end();
+      } catch (err) {
+        console.warn("Stream end error:", err.message);
+      }
+      recognizeStream = null;
+    }
+  }
 
   try {
-    recognizeStream = client.streamingRecognize(request)
+    recognizeStream = client
+      .streamingRecognize(request)
       .on('error', (e) => {
         console.error("Google Speech error:", e);
         if (ws.readyState === ws.OPEN) {
@@ -37,30 +71,28 @@ export function googleStream(ws) {
         if (!data.results?.[0]) return;
 
         const result = data.results[0];
-        const transcript = result.alternatives[0]?.transcript || '';
-        console.log(transcript);
+        const transcript = result.alternatives?.[0]?.transcript || '';
 
-        ws.send(JSON.stringify({
-          type: result.isFinal ? 'final' : 'interim',
-          text: transcript,
-        }));
+        if (transcript) {
+          console.log("Transcript:", transcript);
+          if (ws.readyState === ws.OPEN) {
+            ws.send(JSON.stringify({
+              type: result.isFinal ? 'final' : 'interim',
+              text: transcript,
+            }));
+          }
+        }
       });
   } catch (err) {
-    console.error("Failed to init stream:", err);
-    ws.close(1011, "Google stream init error");
+    console.error("Failed to init Google stream:", err);
+    if (ws.readyState === ws.OPEN) {
+      ws.close(1011, "Google stream init error");
+    }
     return;
   }
 
-  // Safely end/cleanup
-  function safeEnd() {
-    if (recognizeStream) {
-      try { recognizeStream.end(); } catch {}
-      recognizeStream = null;
-    }
-  }
-
   ws.on('message', (msg) => {
-    if (!recognizeStream) return; // don't write if closed
+    if (!recognizeStream) return;
     try {
       recognizeStream.write(Buffer.from(msg));
     } catch (err) {

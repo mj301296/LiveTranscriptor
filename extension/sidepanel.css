@@ -1,0 +1,147 @@
+:root {
+    --bg: #0b0f14;
+    --fg: #e6eef7;
+    --muted: #87a0b2;
+    --accent: #4ea1ff;
+    --bad: #ff5d5d;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font: 14px/1.4 system-ui, Segoe UI, Roboto, Helvetica, Arial;
+    background: var(--bg);
+    color: var(--fg);
+}
+
+header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 14px;
+    border-bottom: 1px solid #1e2630;
+}
+
+h1 {
+    margin: 0;
+    font-size: 16px;
+}
+
+#status {
+    color: var(--muted);
+}
+
+#controls {
+    display: flex;
+    gap: 8px;
+    padding: 10px 14px;
+    align-items: center;
+    border-bottom: 1px solid #1e2630;
+}
+
+button {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 12px;
+    background: #1a2430;
+    color: var(--fg);
+    cursor: pointer;
+}
+
+button.primary {
+    background: var(--accent);
+    color: #041423;
+    font-weight: 600;
+}
+
+button:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+}
+
+.toggle {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--muted);
+}
+
+#timer {
+    padding: 6px 14px;
+    color: var(--muted);
+}
+
+#transcript {
+    padding: 12px 14px 120px;
+    height: 55vh;
+    overflow: auto;
+    white-space: pre-wrap;
+}
+
+#transcript .ts {
+    color: var(--muted);
+    font-size: 12px;
+}
+
+#exports {
+    position: fixed;
+    bottom: 8px;
+    left: 0;
+    right: 0;
+    padding: 8px 14px;
+    display: flex;
+    gap: 8px;
+    backdrop-filter: blur(6px);
+    background: rgba(11, 15, 20, .65);
+    border-top: 1px solid #1e2630;
+}
+.src {
+  font-weight: bold;
+  margin-right: 4px;
+  color: #007acc;
+}
+
+footer {
+    position: fixed;
+    bottom: 60px;
+    left: 0;
+    right: 0;
+    padding: 6px 14px;
+    color: var(--muted);
+    display: flex;
+}
+
+#recDot,
+#connDot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 8px;
+}
+
+#recDot {
+    background: #555;
+}
+
+#connDot {
+    background: #555;
+}
+
+#recDot.on {
+    background: #ff4d4d;
+    box-shadow: 0 0 10px #ff4d4d;
+}
+
+#connDot.ok {
+    background: #2fe38f;
+    box-shadow: 0 0 8px #2fe38f;
+}
+
+#errText {
+    color: var(--bad);
+    margin-left: auto;
+}
